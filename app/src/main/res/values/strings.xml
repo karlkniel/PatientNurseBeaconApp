@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">MobileFinal</string>
+    <string name="title_activity_start_beacon_scan">StartBeaconScan</string>
+</resources>
