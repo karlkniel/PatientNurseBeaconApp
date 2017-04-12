@@ -4,15 +4,22 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Message;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -24,6 +31,7 @@ import com.google.android.gms.nearby.messages.MessageListener;
 import com.google.android.gms.nearby.messages.PublishOptions;
 import com.google.android.gms.nearby.messages.Strategy;
 import com.google.android.gms.nearby.messages.SubscribeOptions;
+import android.widget.AdapterView.OnItemClickListener;
 
 import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconConsumer;
@@ -33,6 +41,8 @@ import org.altbeacon.beacon.Identifier;
 import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 
 public class StartBeaconScan extends AppCompatActivity implements BeaconConsumer, RangeNotifier, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
@@ -40,7 +50,9 @@ public class StartBeaconScan extends AppCompatActivity implements BeaconConsumer
     private BeaconManager mBeaconManager;
     private GoogleApiClient mGoogleApiClient;
     private MessageListener mMessageListener;
-    private Context mContext;
+
+    public ArrayAdapter<String> arrayAdapter;
+
     private com.google.android.gms.nearby.messages.Message mActiveMessage;
     public boolean b1, i1, m1;
     int count = 0;
@@ -115,8 +127,13 @@ public class StartBeaconScan extends AppCompatActivity implements BeaconConsumer
     }
 
     //healthcarepn-164116
-    //key: AIzaSyATsrH1iyb5KY5IArFIiYDTF-TqKVajeB4
+    //key: AIzaSyBmpulDwsyv55GyEi9hGsFgWLOuy16MLqM
     //OAuth Key: 113749439321-38oml7jd4jt41dmt03b56gtthtrlns7i.apps.googleusercontent.com
+
+    //SEEBASS
+    //health-care-app-164116
+    //key: AIzaSyDRBUtFLJM3Q9TDfl-u2O2IwpMXZOv59l4
+
 
 
     @Override
@@ -124,16 +141,40 @@ public class StartBeaconScan extends AppCompatActivity implements BeaconConsumer
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start_beacon_scan);
 
-        if(savedInstanceState == null) {
-            Bundle extras = getIntent().getExtras();
-            if(extras == null)
-            {
-                showNotification("ERROR: ", "Not clicked");
-            }else if(extras.getBoolean("NotClick"))
-            {
-                //ViewPatientRequest.addItems("");
+
+        final ListView listView = (ListView) findViewById(R.id.beaconReqView);
+        String[] list = new String[] {};
+        MainActivity.reqList = new ArrayList<String>(Arrays.asList(list));
+
+        arrayAdapter = new ArrayAdapter<String>
+                (this, android.R.layout.simple_list_item_1, MainActivity.reqList);
+        listView.setAdapter(arrayAdapter);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> list, View v, int pos, long id) {
+                final int patPos = pos;
+                AlertDialog.Builder builder = new AlertDialog.Builder(StartBeaconScan.this);
+                builder.setMessage("Do you want to accept this request?");
+                builder.setCancelable(true);
+
+                builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        MainActivity.acceptList.add(MainActivity.reqList.get(patPos));
+                        dialog.cancel();
+                    }
+                });
+
+                builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+
+                AlertDialog dialog = builder.create();
+                dialog.show();
+
             }
-        }
+        });
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Nearby.MESSAGES_API)
@@ -142,18 +183,14 @@ public class StartBeaconScan extends AppCompatActivity implements BeaconConsumer
                 .enableAutoManage(this, this)
                 .build();
 
-
-
-
-        //Nearby.Messages.subscribe(mGoogleApiClient, mMessageListener, SubscribeOptions.DEFAULT);
-
     }
 
     private void subscribe() {
         Log.i("TAG", "Subscribing.");
 
         MessageFilter messageFilter = new MessageFilter.Builder()
-                .includeNamespacedType("healthcarepn-164116", "string")
+                //.includeNamespacedType("healthcarepn-164116", "string")
+                .includeNamespacedType("health-care-app-164116", "111")
                 .build();
 
         SubscribeOptions options = new SubscribeOptions.Builder()
@@ -164,13 +201,27 @@ public class StartBeaconScan extends AppCompatActivity implements BeaconConsumer
         mMessageListener = new MessageListener() {
 
             public void onFound(com.google.android.gms.nearby.messages.Message message) {
-                if("healthcarepn-164116".equals(message.getNamespace()) && "string".equals(message.getType())) {
+                String patNameSpace = message.getNamespace();
+                String patType = message.getType();
+
+                if("healthcarepn-164116".equals(patNameSpace) && "string".equals(patType)) {
                     String messageAsString = new String(message.getContent());
                     Log.d("FMS", "Found Message: " + messageAsString);
                     messageCount++;
                     String counter = Integer.toString(messageCount);
+                    PatientInfo object = new PatientInfo("A", 1, messageAsString, messageCount);
+                    MainActivity.reqList.add("Room " + patType + ": " + messageAsString);
+                    arrayAdapter.notifyDataSetChanged();
+                }
 
-                    //ViewPatientRequest.addItems(messageAsString);
+                if("health-care-app-164116".equals(patNameSpace) && "111".equals(patType)) {
+                    String messageAsString = new String(message.getContent());
+                    Log.d("FMS", "Found Message: " + messageAsString);
+                    messageCount++;
+                    String counter = Integer.toString(messageCount);
+                    PatientInfo object = new PatientInfo("A", 1, messageAsString, messageCount);
+                    MainActivity.reqList.add("Room " + patType + ": " + messageAsString);
+                    arrayAdapter.notifyDataSetChanged();
                 }
 
             }

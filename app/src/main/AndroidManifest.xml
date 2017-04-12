@@ -16,10 +16,9 @@
         android:theme="@style/AppTheme">
         <meta-data
             android:name="com.google.android.nearby.messages.API_KEY"
-            android:value="AIzaSyBmpulDwsyv55GyEi9hGsFgWLOuy16MLqM" />
+            android:value="AIzaSyDRBUtFLJM3Q9TDfl-u2O2IwpMXZOv59l4" />
 
-        <activity
-            android:name=".MainActivity">
+        <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -29,13 +28,15 @@
 
         <activity
             android:name=".ViewPatientRequest"
-            android:label="Patient Requests">
-        </activity>
+            android:label="Active Requests" />
 
         <activity
             android:name=".StartBeaconScan"
-            android:label="Scanning for Active Requests">
-        </activity>
+            android:label="Scanning for Requests in Area" />
+
+        <activity
+            android:name=".CompletedRequests"
+            android:label="Completed Requests" />
 
     </application>
 

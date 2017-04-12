@@ -1,74 +1,71 @@
 package com.example.karl.mobilefinal;
 
+import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class ViewPatientRequest extends AppCompatActivity {
 
-    ArrayList<String> listItems = new ArrayList<String>();
-    ArrayAdapter<String> adapter;
-    private RecyclerView mRecyclerView;
-    private RecyclerView.Adapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
-    private static String LOG_TAG = "CardViewActivity";
-    String pName;
-    String pHelp;
-    int pRoom;
-    int pReq;
+    ArrayAdapter<String> arrayAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_patient_request);
 
-        /*
-        mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
-        mRecyclerView.setHasFixedSize(true);
-        mLayoutManager = new LinearLayoutManager(this);
-        mRecyclerView.setLayoutManager(mLayoutManager);
-        mAdapter = new PatientView(getDataSet());
-        mRecyclerView.setAdapter(mAdapter);
-        */
 
-        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, listItems);
+        final ListView listView = (ListView) findViewById(R.id.patReqView);
+        String[] list = new String[]{};
+        //MainActivity.acceptList = new ArrayList<String>(Arrays.asList(list));
+        arrayAdapter = new ArrayAdapter<String>
+                (this, android.R.layout.simple_list_item_1, MainActivity.acceptList);
+        listView.setAdapter(arrayAdapter);
 
-        ListView patientView = (ListView) findViewById(R.id.patReqView);
+        arrayAdapter.notifyDataSetChanged();
 
-        ArrayList results = new ArrayList<PatientInfo>();
-        PatientInfo object = new PatientInfo(pName, pRoom, pHelp, pReq);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> list, View v, int pos, long id) {
+                final int patPos = pos;
+                AlertDialog.Builder builder = new AlertDialog.Builder(ViewPatientRequest.this);
+                builder.setMessage("Do you want to mark this request as completed?");
+                builder.setCancelable(true);
 
-        int count = 0;
-        while(count < pReq) {
-            results.add(pReq, object);
-        }
+                builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        MainActivity.completeList.add(MainActivity.acceptList.get(patPos));
+                        MainActivity.acceptList.remove(patPos);
+                        dialog.cancel();
+                        finish();
+                        startActivity(getIntent());
+                    }
+                });
 
+                builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
 
-        Bundle bundle = getIntent().getExtras();
-        if(bundle != null) {
-            String s = bundle.getString("A");
-            adapter.add(s);
-            Log.d("LIST", s);
-        }
+                AlertDialog dialog = builder.create();
+                dialog.show();
+
+            }
+        });
 
     }
-
-    /*
-    private ArrayList<PatientInfo> getDataSet() {
-        ArrayList results = new ArrayList<PatientInfo>();
-        for (int index = 0; index < 20; index++) {
-            PatientInfo obj = new PatientInfo("Name " + index, index, "Reason " + index);
-            results.add(index, obj);
-        }
-        return results;
-    }
-    */
 
 }

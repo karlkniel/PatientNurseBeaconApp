@@ -8,21 +8,31 @@
 
     <Button
         android:id="@+id/start_scan"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
         android:text="Start Scan"
         android:layout_alignParentTop="true"
         android:layout_alignParentStart="true"
         />
 
     <Button
-        android:id="@+id/pat_req"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:text="View Active Requests"
-        android:layout_below="@+id/start_scan"
+    android:id="@+id/pat_req"
+    android:layout_width="120dp"
+    android:layout_height="120dp"
+    android:text="View Active Requests"
+    android:layout_below="@+id/start_scan"
+    android:layout_alignParentStart="true"
+    android:layout_marginTop="50dp" />
+
+    <Button
+        android:id="@+id/comp_req"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:text="View Completed Requests"
+        android:layout_below="@+id/pat_req"
         android:layout_alignParentStart="true"
         android:layout_marginTop="50dp" />
+
 
 
 </RelativeLayout>
