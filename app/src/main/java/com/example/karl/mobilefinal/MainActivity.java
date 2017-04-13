@@ -36,10 +36,11 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
     public static String regionName = "NO REGION SELECTED";
     public Button regionButton;
     public TextView regionInfo;
+    public TextView placeInfo;
     public ArrayList<String> beaconList;
     private BeaconManager mBeaconManager;
 
-    public static boolean b1, m1, w1;
+    public boolean b1, m1, w1;
     int count = 0;
 
     @Override
@@ -60,9 +61,11 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
         if(!regionName.equals("NO REGION SELECTED")) {
             regionButton.setVisibility(View.VISIBLE);
             regionInfo.setVisibility(View.VISIBLE);
+            placeInfo.setVisibility(View.INVISIBLE);
         }else{
             regionButton.setVisibility(View.INVISIBLE);
             regionInfo.setVisibility(View.INVISIBLE);
+            placeInfo.setVisibility(View.VISIBLE);
         }
     }
 
@@ -159,6 +162,10 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        b1 = false;
+        m1 = false;
+        w1 = false;
+
         String[] list = new String[] {};
         beaconList = new ArrayList<String>(Arrays.asList(list));
 
@@ -208,6 +215,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
         });
 
         regionInfo = (TextView) findViewById(R.id.region_text);
+        placeInfo = (TextView) findViewById(R.id.place_holder_region);
 
     }
 

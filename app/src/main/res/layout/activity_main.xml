@@ -111,7 +111,20 @@
         android:layout_above="@+id/start_scan"
         android:layout_toStartOf="@+id/textView5"
         android:textAllCaps="false"
-        android:fontFamily="sans-serif-smallcaps" />
+        android:fontFamily="sans-serif-smallcaps"
+        android:textSize="14sp" />
+
+    <TextView
+        android:text="In order to view requests made to a specific beacon, the user must click &quot;View Nearby Beacons&quot; to see which region(s) are available. Once a region is selected, then the requests made to that region's beacon are accessible."
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/view_region_req"
+        android:layout_alignStart="@+id/view_region_req"
+        android:id="@+id/place_holder_region"
+        android:layout_alignEnd="@+id/title_with_region"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="14sp"
+        android:layout_alignBottom="@+id/view_region_req" />
 
 
 </RelativeLayout>

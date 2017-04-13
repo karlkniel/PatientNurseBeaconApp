@@ -61,8 +61,6 @@ public class StartBeaconScan extends AppCompatActivity implements GoogleApiClien
     //health-care-app-164116
     //key: AIzaSyDRBUtFLJM3Q9TDfl-u2O2IwpMXZOv59l4
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
