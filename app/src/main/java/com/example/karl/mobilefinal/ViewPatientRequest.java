@@ -12,11 +12,14 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import static com.example.karl.mobilefinal.MainActivity.acceptList;
 
 public class ViewPatientRequest extends AppCompatActivity {
 
@@ -27,14 +30,11 @@ public class ViewPatientRequest extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_patient_request);
 
-
         final ListView listView = (ListView) findViewById(R.id.patReqView);
-        String[] list = new String[]{};
-        //MainActivity.acceptList = new ArrayList<String>(Arrays.asList(list));
-        arrayAdapter = new ArrayAdapter<String>
-                (this, android.R.layout.simple_list_item_1, MainActivity.acceptList);
-        listView.setAdapter(arrayAdapter);
 
+        arrayAdapter = new ArrayAdapter<String>
+                (this, android.R.layout.simple_list_item_1, acceptList);
+        listView.setAdapter(arrayAdapter);
         arrayAdapter.notifyDataSetChanged();
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -46,11 +46,10 @@ public class ViewPatientRequest extends AppCompatActivity {
 
                 builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        MainActivity.completeList.add(MainActivity.acceptList.get(patPos));
-                        MainActivity.acceptList.remove(patPos);
+                        MainActivity.completeList.add(acceptList.get(patPos));
+                        acceptList.remove(patPos);
                         dialog.cancel();
-                        finish();
-                        startActivity(getIntent());
+                        arrayAdapter.notifyDataSetChanged();
                     }
                 });
 
@@ -66,6 +65,24 @@ public class ViewPatientRequest extends AppCompatActivity {
             }
         });
 
+        Button home = (Button) findViewById(R.id.home_s);
+        home.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ViewPatientRequest.this, MainActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        Button areaR = (Button) findViewById(R.id.region_requests);
+        areaR.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ViewPatientRequest.this, StartBeaconScan.class);
+                intent.putExtra("ID", MainActivity.regionName);
+                startActivity(intent);
+            }
+        });
     }
 
 }

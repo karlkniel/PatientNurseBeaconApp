@@ -13,8 +13,28 @@
     <ListView
         android:id='@+id/beaconReqView'
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_height="400dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true" />
+
+    <Button
+        android:id="@+id/hhome"
+        android:layout_width="120dp"
+        android:text="Home"
+        android:layout_height="80dp"
+        style="@android:style/Widget.Holo.Button"
+        android:fontFamily="sans-serif-smallcaps"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true" />
+
+    <Button
+        android:id="@+id/reload"
+        android:layout_width="120dp"
+        android:text="Refresh"
+        android:layout_height="80dp"
+        style="@android:style/Widget.Holo.Button"
+        android:fontFamily="sans-serif-smallcaps"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true" />
 
 </RelativeLayout>

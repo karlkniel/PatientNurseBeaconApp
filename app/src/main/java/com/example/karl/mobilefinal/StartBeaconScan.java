@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Message;
@@ -15,8 +16,10 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -33,98 +36,22 @@ import com.google.android.gms.nearby.messages.Strategy;
 import com.google.android.gms.nearby.messages.SubscribeOptions;
 import android.widget.AdapterView.OnItemClickListener;
 
-import org.altbeacon.beacon.Beacon;
-import org.altbeacon.beacon.BeaconConsumer;
-import org.altbeacon.beacon.BeaconManager;
-import org.altbeacon.beacon.BeaconParser;
-import org.altbeacon.beacon.Identifier;
-import org.altbeacon.beacon.RangeNotifier;
-import org.altbeacon.beacon.Region;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
-public class StartBeaconScan extends AppCompatActivity implements BeaconConsumer, RangeNotifier, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+import static com.example.karl.mobilefinal.MainActivity.reqList;
 
-    private BeaconManager mBeaconManager;
+public class StartBeaconScan extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+
     private GoogleApiClient mGoogleApiClient;
     private MessageListener mMessageListener;
 
     public ArrayAdapter<String> arrayAdapter;
+    boolean messageExists = false;
 
     private com.google.android.gms.nearby.messages.Message mActiveMessage;
-    public boolean b1, i1, m1;
-    int count = 0;
-    int messageCount = 0;
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        mBeaconManager = BeaconManager.getInstanceForApplication(this.getApplicationContext());
-        mBeaconManager.getBeaconParsers().add(new BeaconParser().
-                setBeaconLayout("s:0-1=feaa,m:2-2=00,p:3-3:-41,i:4-13,i:14-19"));
-        mBeaconManager.bind(this);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        mBeaconManager.unbind(this);
-    }
-
-
-    @Override
-    public void onBeaconServiceConnect() {
-        Region region = new Region("Local Beacons", Identifier.parse("0xedd1ebeac04e5defa017"), null, null);
-        if(!b1 && !i1 && !m1) {
-            try {
-                mBeaconManager.stopRangingBeaconsInRegion(region);
-                mBeaconManager.startRangingBeaconsInRegion(region);
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
-            mBeaconManager.setRangeNotifier(this);
-        }else {
-            try {
-                mBeaconManager.stopRangingBeaconsInRegion(region);
-
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
-            mBeaconManager.setRangeNotifier(this);
-        }
-    }
-
-    @Override
-    public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
-        for (Beacon beacon: beacons) {
-            if (beacon.getServiceUuid() == 0xfeaa && beacon.getBeaconTypeCode() == 0x00) {
-                Identifier instanceId = beacon.getId2();
-
-                if(!b1 && instanceId.equals(Identifier.parse("0xa4412b4109f7"))) {
-                    Log.d("Notification", "I see Beacon blueberry");
-                    showNotification("Entering Wing B: ", "Click to view current patient(s) requests.");
-                    b1 = true;
-                    count++;
-                }
-                if(!i1 && instanceId.equals(Identifier.parse("0xf5ac5b224426"))) {
-                    Log.d("Notification", "I see Beacon ice");
-                    showNotification("Entering Wing I: ", "Click to view current patient(s) requests.");
-                    i1 = true;
-                    count++;
-                }
-                if(!m1 && instanceId.equals(Identifier.parse("0xd211181d4d1c"))) {
-                    Log.d("Notification", "I see Beacon mint");
-                    showNotification("Entering Wing M: ", "Click to view current patient(s) requests.");
-                    m1 = true;
-                    count++;
-                }
-
-                Log.d("Count:", String.valueOf(count));
-            }
-        }
-    }
 
     //healthcarepn-164116
     //key: AIzaSyBmpulDwsyv55GyEi9hGsFgWLOuy16MLqM
@@ -141,14 +68,13 @@ public class StartBeaconScan extends AppCompatActivity implements BeaconConsumer
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start_beacon_scan);
 
-
         final ListView listView = (ListView) findViewById(R.id.beaconReqView);
-        String[] list = new String[] {};
-        MainActivity.reqList = new ArrayList<String>(Arrays.asList(list));
 
         arrayAdapter = new ArrayAdapter<String>
-                (this, android.R.layout.simple_list_item_1, MainActivity.reqList);
+                (this, android.R.layout.simple_list_item_1, reqList);
+
         listView.setAdapter(arrayAdapter);
+
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> list, View v, int pos, long id) {
@@ -159,7 +85,9 @@ public class StartBeaconScan extends AppCompatActivity implements BeaconConsumer
 
                 builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        MainActivity.acceptList.add(MainActivity.reqList.get(patPos));
+                        MainActivity.acceptList.add(reqList.get(patPos));
+                        reqList.remove(patPos);
+                        arrayAdapter.notifyDataSetChanged();
                         dialog.cancel();
                     }
                 });
@@ -183,14 +111,52 @@ public class StartBeaconScan extends AppCompatActivity implements BeaconConsumer
                 .enableAutoManage(this, this)
                 .build();
 
+        Button home = (Button) findViewById(R.id.hhome);
+        home.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+                Intent intent = new Intent(StartBeaconScan.this, MainActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        Button reload = (Button) findViewById(R.id.reload);
+        reload.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                reqList.clear();
+                recreate();
+            }
+        });
     }
+
 
     private void subscribe() {
         Log.i("TAG", "Subscribing.");
+        String typeAttachment = "";
+
+        String beaconID = getIntent().getExtras().getString("ID");
+
+        Log.d("BEACON", beaconID);
+
+        if(beaconID.equals("0xabcd1234abcd") || beaconID.equals("W")) {
+            typeAttachment = "111";
+        }else if(beaconID.equals("0xd211181d4d1c") || beaconID.equals("M")) {
+            typeAttachment = "mint";
+        }else if(beaconID.equals("0xa4412b4109f7") || beaconID.equals("B")) {
+            typeAttachment = "blue";
+            Log.d("BLUE", beaconID);
+        }else if(beaconID.equals("LOCAL")) {
+
+            Log.d("LOCAL", beaconID);
+        }else {
+            showNotification("ALERT: ", "No beacons found in current area.");
+        }
 
         MessageFilter messageFilter = new MessageFilter.Builder()
-                //.includeNamespacedType("healthcarepn-164116", "string")
-                .includeNamespacedType("health-care-app-164116", "111")
+                //.includeNamespacedType("healthcarepn-164116", typeAttachment)
+                .includeNamespacedType("health-care-app-164116", typeAttachment)
                 .build();
 
         SubscribeOptions options = new SubscribeOptions.Builder()
@@ -206,21 +172,53 @@ public class StartBeaconScan extends AppCompatActivity implements BeaconConsumer
 
                 if("healthcarepn-164116".equals(patNameSpace) && "string".equals(patType)) {
                     String messageAsString = new String(message.getContent());
+                    String [] parts = messageAsString.split("!");
+                    String roomNumber = parts[0];
+                    String requestMessage = parts[1];
+
+                    if(parts[1].equals("EMERGENCY")) {
+                        showEmergencyNotification("Room " + parts[0], parts[1]);
+                    }
+
                     Log.d("FMS", "Found Message: " + messageAsString);
-                    messageCount++;
-                    String counter = Integer.toString(messageCount);
-                    PatientInfo object = new PatientInfo("A", 1, messageAsString, messageCount);
-                    MainActivity.reqList.add("Room " + patType + ": " + messageAsString);
+
+                    reqList.add("Room " + roomNumber + ": " + requestMessage);
                     arrayAdapter.notifyDataSetChanged();
                 }
 
                 if("health-care-app-164116".equals(patNameSpace) && "111".equals(patType)) {
                     String messageAsString = new String(message.getContent());
-                    Log.d("FMS", "Found Message: " + messageAsString);
-                    messageCount++;
-                    String counter = Integer.toString(messageCount);
-                    PatientInfo object = new PatientInfo("A", 1, messageAsString, messageCount);
-                    MainActivity.reqList.add("Room " + patType + ": " + messageAsString);
+                    String [] parts = messageAsString.split("!");
+                    String roomNumber = parts[0];
+                    String requestMessage = parts[1];
+
+                    if(parts[1].equals("EMERGENCY")) {
+                        showEmergencyNotification("Room " + parts[0], parts[1]);
+                    }
+
+                    Log.d("BEACON", "Found Message: " + messageAsString);
+
+
+
+                    if(!reqList.isEmpty()) {
+                        for(int i = 0; i <  reqList.size(); i++) {
+                            String [] tempParts = reqList.get(i).split(": ");
+                            if(requestMessage.equals(tempParts[1])) {
+                                if(roomNumber.equals(tempParts[0])) {
+                                    messageExists = true;
+                                    break;
+                                }
+
+                            }
+                        }
+                    }
+
+                    if(!messageExists) {
+                        reqList.add("Room " + roomNumber + ": " + requestMessage);
+                    }
+
+                    messageExists = false;
+
                     arrayAdapter.notifyDataSetChanged();
                 }
 
@@ -231,8 +229,11 @@ public class StartBeaconScan extends AppCompatActivity implements BeaconConsumer
                 Log.d("TAG", "Lost sight of message: " + messageAsString);
             }
         };
+
         Nearby.Messages.subscribe(mGoogleApiClient, mMessageListener, options);
     }
+
+
 
     private void unsubscribe() {
         Log.i("TAG", "Unsubscribing.");
@@ -277,7 +278,7 @@ public class StartBeaconScan extends AppCompatActivity implements BeaconConsumer
 
     @Override
     public void onStop() {
-        unpublish();
+        //unpublish();
         unsubscribe();
         if(mGoogleApiClient.isConnected()) {
             mGoogleApiClient.disconnect();
@@ -302,7 +303,24 @@ public class StartBeaconScan extends AppCompatActivity implements BeaconConsumer
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        notificationManager.notify(count, notification);
+        notificationManager.notify(1, notification);
+    }
+
+    public void showEmergencyNotification(String title, String message) {
+
+        Notification notification = new Notification.Builder(this)
+                .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .setContentTitle(title)
+                .setContentText(message)
+                .setAutoCancel(true)
+                .build();
+        notification.defaults |= Notification.DEFAULT_SOUND;
+        notification.defaults |= Notification.DEFAULT_VIBRATE;
+        notification.defaults |= Notification.DEFAULT_LIGHTS;
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        notificationManager.notify(1, notification);
     }
 
     @Override
